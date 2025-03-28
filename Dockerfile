@@ -1,11 +1,10 @@
-# Imagen base con Python
+# Usa una imagen liviana de Python con apt
 FROM python:3.11-slim
 
-# Instala dependencias necesarias para Chromium
+# Instala Chromium y dependencias necesarias
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
+    chromium \
+    chromium-driver \
     fonts-liberation \
     libappindicator3-1 \
     libasound2 \
@@ -21,23 +20,23 @@ RUN apt-get update && apt-get install -y \
     libxdamage1 \
     libxrandr2 \
     xdg-utils \
-    chromium \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Establece la variable de entorno para que pyppeteer use Chromium del sistema
+# Configura la variable de entorno para que Pyppeteer use Chromium del sistema
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Crea directorio para la app
+# Define el directorio de trabajo
 WORKDIR /app
 
-# Copia todos los archivos de la app
+# Copia todos los archivos
 COPY . .
 
-# Instala dependencias
+# Instala las dependencias
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Expone el puerto 8080 para DigitalOcean
+# Expón el puerto 8080
 EXPOSE 8080
 
-# Comando para correr el servidor
+# Usa gunicorn como servidor de producción
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
