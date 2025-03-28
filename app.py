@@ -10,10 +10,13 @@ nest_asyncio.apply()
 app = Flask(__name__)
 
 async def url_to_pdf(url):
-    browser = await launch(args=['--no-sandbox'])
+    browser = await launch(
+        executablePath="/usr/bin/chromium",
+        args=['--no-sandbox', '--disable-dev-shm-usage']
+    )
     page = await browser.newPage()
     await page.goto(url, {'waitUntil': 'networkidle2'})
-    await asyncio.sleep(5)  # espera adicional
+    await asyncio.sleep(5)
     pdf_bytes = await page.pdf(format='A4')
     await browser.close()
     return pdf_bytes
