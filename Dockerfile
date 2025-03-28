@@ -1,25 +1,43 @@
-FROM python:3.10-slim
+# Imagen base con Python
+FROM python:3.11-slim
 
-# Instala dependencias del sistema necesarias para Chromium
+# Instala dependencias necesarias para Chromium
 RUN apt-get update && apt-get install -y \
-    wget gnupg ca-certificates fonts-liberation \
-    libappindicator3-1 libasound2 libatk-bridge2.0-0 libatk1.0-0 \
-    libcups2 libdbus-1-3 libgdk-pixbuf2.0-0 libnspr4 libnss3 \
-    libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 xdg-utils \
-    chromium chromium-driver \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    wget \
+    gnupg \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libgdk-pixbuf2.0-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    chromium \
+    && rm -rf /var/lib/apt/lists/*
 
-# Establecer el directorio de trabajo
+# Establece la variable de entorno para que pyppeteer use Chromium del sistema
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# Crea directorio para la app
 WORKDIR /app
 
-# Copiar archivos
-COPY . /app
+# Copia todos los archivos de la app
+COPY . .
 
-# Instalar dependencias de Python
-RUN pip install --no-cache-dir -r requirements.txt
+# Instala dependencias
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Expone el puerto
+# Expone el puerto 8080 para DigitalOcean
 EXPOSE 8080
 
-# Ejecutar el servidor
-CMD ["python", "app.py"]
+# Comando para correr el servidor
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
