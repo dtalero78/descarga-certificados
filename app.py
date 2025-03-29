@@ -10,7 +10,7 @@ nest_asyncio.apply()  # Para permitir asyncio.run en Flask
 
 async def url_to_pdf(url):
     # Obtener la ruta de Chromium desde CHROME_BIN (definida en Dockerfile) o usar /usr/bin/chromium
-    chrome_path = os.environ.get('CHROME_BIN', '/usr/bin/chromium')
+    chrome_path = os.environ.get('PUPPETEER_EXECUTABLE_PATH', '/usr/bin/chromium')
     browser = await launch(
         executablePath=chrome_path,
         args=[
