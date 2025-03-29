@@ -24,12 +24,12 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Configura la variable de entorno para que Pyppeteer use Chromium del sistema
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+ENV CHROME_BIN=/usr/bin/chromium
 
 # Define el directorio de trabajo
 WORKDIR /app
 
-# Copia todos los archivos
+# Copia todos los archivos de tu proyecto a /app
 COPY . .
 
 # Instala las dependencias

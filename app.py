@@ -5,19 +5,24 @@ from pyppeteer import launch
 import io
 import os
 
-nest_asyncio.apply()
-
 app = Flask(__name__)
+nest_asyncio.apply()  # Para permitir asyncio.run en Flask
 
 async def url_to_pdf(url):
+    # Obtener la ruta de Chromium desde CHROME_BIN (definida en Dockerfile) o usar /usr/bin/chromium
+    chrome_path = os.environ.get('CHROME_BIN', '/usr/bin/chromium')
     browser = await launch(
-        executablePath="/usr/bin/chromium",
-        args=['--no-sandbox', '--disable-dev-shm-usage']
+        executablePath=chrome_path,
+        args=[
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-setuid-sandbox'
+        ]
     )
     page = await browser.newPage()
     await page.goto(url, {'waitUntil': 'networkidle2'})
-    await asyncio.sleep(5)
-    pdf_bytes = await page.pdf(format='A4')
+    await asyncio.sleep(5)  # Esperar que Wix (o tu página) cargue completamente
+    pdf_bytes = await page.pdf(format='A4', printBackground=True)
     await browser.close()
     return pdf_bytes
 
@@ -29,12 +34,12 @@ def index():
             pdf = asyncio.run(url_to_pdf(url))
             return send_file(
                 io.BytesIO(pdf),
-                download_name="salida.pdf",
+                download_name="certificado.pdf",
                 as_attachment=True,
                 mimetype='application/pdf'
             )
     return render_template('index.html')
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False, threaded=False)
+    # En local, Flask se ejecuta en 0.0.0.0:8080
+    app.run(host="0.0.0.0", port=8080)
